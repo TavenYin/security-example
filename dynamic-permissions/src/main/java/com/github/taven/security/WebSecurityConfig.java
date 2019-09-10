@@ -6,18 +6,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDecisionVoter;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.vote.AffirmativeBased;
 import org.springframework.security.access.vote.AuthenticatedVoter;
 import org.springframework.security.access.vote.RoleVoter;
-import org.springframework.security.access.vote.UnanimousBased;
 import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.access.expression.WebExpressionVoter;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 
@@ -34,7 +36,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
             .authorizeRequests()
-                .antMatchers("/", "/home").permitAll()
+                .antMatchers("/", "/home", "/403").permitAll()
                 .anyRequest().authenticated()
                 .withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {
                     @Override
@@ -52,6 +54,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
             .logout()
                 .permitAll()
+                .and()
+            .exceptionHandling().accessDeniedHandler((request, response, accessDeniedException) -> {
+                response.sendRedirect(request.getContextPath() + "/403");
+            }).authenticationEntryPoint((request, response, authException) -> {
+                response.sendRedirect(request.getContextPath() + "/403");
+            })
         ;
     }
 
@@ -66,19 +74,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(userDetailsService()).passwordEncoder(new BCryptPasswordEncoder());
     }
 
-    public static void main(String[] args) {
-        System.out.println(new BCryptPasswordEncoder().encode("123456"));
-        System.out.println(new BCryptPasswordEncoder().matches("123456", "$2a$10$kbuK4D6T80VkyBtuXg7sVuIG8akruimUSs4x7CQ4bwHZ0se6NnHq."));
-    }
-
     private List<AccessDecisionVoter<? extends Object>> getDecisionVoters() {
-        List<AccessDecisionVoter<? extends Object>> decisionVoters
-                = Arrays.asList(
+        return Arrays.asList(
                 new WebExpressionVoter(),
 //                new RoleVoter(),
 //                new AuthenticatedVoter(),
-                new MyAccessDecisionVoter(securityService));
-        return decisionVoters;
+                new MyAccessDecisionVoter(securityService)
+        );
     }
 
 }

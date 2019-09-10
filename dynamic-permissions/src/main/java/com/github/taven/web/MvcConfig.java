@@ -1,4 +1,4 @@
-package com.github.taven;
+package com.github.taven.web;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;

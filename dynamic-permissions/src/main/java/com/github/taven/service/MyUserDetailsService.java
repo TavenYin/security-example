@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 public class MyUserDetailsService implements UserDetailsService {
+    private static final String ROLE_PREFIX = "ROLE_";
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -29,6 +30,8 @@ public class MyUserDetailsService implements UserDetailsService {
         return User.builder()
                 .username(username)
                 .password(user.getPassword())
+                // 这里要求权限不为null，随便写了一个，可以在这里将用户的角色权限全查出来
+                .authorities(ROLE_PREFIX+"USER")
                 .build();
     }
 

@@ -36,4 +36,20 @@ class Sql {
     where r.is_delete = 0
     and ur.user_id = ?
 '''
+
+    public static String getPermByResource = '''
+    SELECT permission_code FROM `sys_permission`
+    where url = ?
+'''
+
+    public static String getPermByUsername = '''
+    select 
+        permission_code
+    from sys_user u
+    INNER JOIN sys_user_role_ref ur on u.id = ur.user_id
+    INNER JOIN sys_role r on r.id = ur.role_id
+    INNER JOIN sys_role_permission_ref rp on rp.role_id = r.id
+    INNER JOIN sys_permission p on p.id = rp.permission_id
+    where u.username = ?
+'''
 }

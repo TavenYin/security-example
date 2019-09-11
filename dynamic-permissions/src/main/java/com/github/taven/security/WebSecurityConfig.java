@@ -55,11 +55,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .logout()
                 .permitAll()
                 .and()
-            .exceptionHandling().accessDeniedHandler((request, response, accessDeniedException) -> {
-                response.sendRedirect(request.getContextPath() + "/403");
-            }).authenticationEntryPoint((request, response, authException) -> {
-                response.sendRedirect(request.getContextPath() + "/403");
-            })
+            .exceptionHandling()
+                // 访问拒绝时处理
+                .accessDeniedHandler((request, response, accessDeniedException) -> response.sendRedirect(request.getContextPath() + "/403"))
+                // 登录时访问拒绝处理
+                .authenticationEntryPoint((request, response, authException) -> response.sendRedirect(request.getContextPath() + "/403"))
         ;
     }
 

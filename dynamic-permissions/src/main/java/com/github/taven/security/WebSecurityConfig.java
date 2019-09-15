@@ -2,6 +2,7 @@ package com.github.taven.security;
 
 import com.github.taven.service.MyUserDetailsService;
 import com.github.taven.service.SecurityService;
+import groovy.json.JsonOutput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,8 +24,11 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.access.expression.WebExpressionVoter;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 
+import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
@@ -57,9 +61,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
             .exceptionHandling()
                 // 访问拒绝时处理
-                .accessDeniedHandler((request, response, accessDeniedException) -> response.sendRedirect(request.getContextPath() + "/403"))
-                // 登录时访问拒绝处理
-                .authenticationEntryPoint((request, response, authException) -> response.sendRedirect(request.getContextPath() + "/403"))
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            Map<String, Object> result = new HashMap<>();
+                            result.put("code", 403);
+                            result.put("mes", "access denied, u don't have permission");
+                            PrintWriter out = response.getWriter();
+                            out.append(JsonOutput.toJson(result));
+                        })
+//                .authenticationEntryPoint((request, response, authException) -> response.sendRedirect(request.getContextPath() + "/403")) // 认证时访问拒绝处理
         ;
     }
 

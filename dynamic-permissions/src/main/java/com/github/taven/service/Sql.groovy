@@ -51,5 +51,10 @@ class Sql {
     INNER JOIN sys_role_permission_ref rp on rp.role_id = r.id
     INNER JOIN sys_permission p on p.id = rp.permission_id
     where u.username = ?
+    and u.is_delete = '0'
+    and ur.is_delete = '0'
+    and r.is_delete = '0'
+    and rp.is_delete = '0'
+    and p.is_delete = '0'
 '''
 }
